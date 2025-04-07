@@ -149,7 +149,7 @@ int main() {
         cout << "3. Fazer levantamento\n";
         cout << "4. Listar clientes\n";
         cout << "0. Sair\n";
-        cout << "Escolha uma opção: ";
+        cout << "\nEscolha uma opção: ";
         cin >> opcao;
         cin.ignore();
 
