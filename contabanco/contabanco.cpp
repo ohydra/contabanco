@@ -50,7 +50,7 @@ void adicionarCliente() {
     Cliente c;
     c.codigo = proximoCodigo++;
 
-    cout << "Nome completo do cliente: Chupa pilas";
+    cout << "Nome completo do cliente: ";
     cin.ignore();
     getline(cin, c.nome);
 
