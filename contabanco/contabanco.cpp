@@ -5,10 +5,6 @@
 
 using namespace std;
 
-
-///TESTE DE COMMIT  
-
-
 struct Cliente {
     int codigo;                 // Código do cliente (ID interno, único)
     string nome;                // Nome completo
@@ -145,13 +141,13 @@ int main() {
     int opcao;
 
     do {
-        cout << "\n===== Menu Bancário =====\n";
+        cout << "\n=======| ATEC BANK |=======\n";
         cout << "1. Adicionar cliente\n";
         cout << "2. Fazer depósito\n";
         cout << "3. Fazer levantamento\n";
         cout << "4. Listar clientes\n";
         cout << "0. Sair\n";
-        cout << "Escolha uma opção: ";
+        cout << "\nEscolha uma opção: ";
         cin >> opcao;
         cin.ignore();
 
