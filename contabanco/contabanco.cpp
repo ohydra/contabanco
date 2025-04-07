@@ -80,11 +80,13 @@ void adicionarCliente() {
     }
 
     clientes.push_back(c);
+    cout << "\033[2J\033[1;1H";
     cout << "Cliente adicionado com sucesso. Código atribuído: " << c.codigo << "\n";
 }
 
 // Listar clientes
 void listarClientes() {
+    cout << "\033[2J\033[1;1H";
     cout << "\n--- Lista de Clientes ---\n";
     for (const auto& c : clientes) {
         cout << "Código: " << c.codigo << " | Nome: " << c.nome << " | CC: " << c.cartaoCidadao
@@ -165,3 +167,4 @@ int main() {
 
     return 0;
 }
+
