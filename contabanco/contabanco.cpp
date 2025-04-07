@@ -5,10 +5,6 @@
 
 using namespace std;
 
-
-///TESTE DE COMMIT  
-
-
 struct Cliente {
     int codigo;                 // Código do cliente (ID interno, único)
     string nome;                // Nome completo
