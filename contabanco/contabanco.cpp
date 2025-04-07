@@ -139,7 +139,7 @@ int main() {
     int opcao;
 
     do {
-        cout << "\n===== Menu Bancário =====\n";
+        cout << "\n=======| ATEC BANK |=======\n";
         cout << "1. Adicionar cliente\n";
         cout << "2. Fazer depósito\n";
         cout << "3. Fazer levantamento\n";
