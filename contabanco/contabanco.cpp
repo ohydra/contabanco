@@ -1,5 +1,7 @@
 #include <iostream>
+#include <windows.h>
 #include <string>
+#include <tchar.h>
 #include <vector>
 #include <cctype>
 
@@ -94,6 +96,7 @@ void listarClientes() {
 void depositar() {
     int codigo;
     double valor;
+    cout << "\033[2J\033[1;1H";
     cout << "Código do cliente: ";
     cin >> codigo;
     Cliente* c = encontrarCliente(codigo);
@@ -138,28 +141,56 @@ void levantar() {
 
 // Menu principal
 int main() {
-    int opcao;
+    setlocale(LC_ALL, "Portuguese_Portugal.UTF-8");
+
+    int opcao1;
+    int opcao2;
 
     do {
-        cout << "\n=======| ATEC BANK |=======\n";
-        cout << "1. Adicionar cliente\n";
-        cout << "2. Fazer depósito\n";
-        cout << "3. Fazer levantamento\n";
-        cout << "4. Listar clientes\n";
+        std::cout << R"(
+        =======|     ____                            _  __               ______      _ __       |=======
+        =======|    / __ )____ _____  _________     | |/ /___ ___  __   / ____/_  __(_) /_____  |=======
+        =======|   / __  / __ `/ __ \/ ___/ __ \    |   / __ `/ / / /  / / __/ / / / / __/ __ \ |=======
+        =======|  / /_/ / /_/ / / / / /__/ /_/ /   /   / /_/ / /_/ /  / /_/ / /_/ / / /_/ /_/ / |=======
+        =======| /_____/\__,_/_/ /_/\___/\____/   /_/|_\__,_/\__,_/   \____/\__,_/_/\__/\____/  |=======
+        =======|                                                                                |=======
+        )" << "\n";
+        cout << "1. Fazer depósito\n";
+        cout << "2. Fazer levantamento\n";
+        cout << "3. PAINEL ADMINISTRATIVO\n";
         cout << "0. Sair\n";
         cout << "\nEscolha uma opção: ";
-        cin >> opcao;
+        cin >> opcao1;
         cin.ignore();
 
-        switch (opcao) {
-        case 1: adicionarCliente(); break;
-        case 2: depositar(); break;
-        case 3: levantar(); break;
-        case 4: listarClientes(); break;
-        case 0: cout << "A sair...\n"; break;
+        switch (opcao1) {
+        case 1: depositar(); break;
+        case 2: levantar(); break;
+        case 3: {
+            int admin;
+            do {
+                cout << "\n1. Adicionar cliente\n";
+                cout << "2. Listar clientes\n";
+                cout << "3. AAAAAAAAAAAAAAA\n";
+                cout << "\nEscolha uma opção: ";
+                cin >> admin;
+                cin.ignore();
+
+                switch (admin) {
+                case 1: adicionarCliente(); break;
+                case 2: listarClientes(); break;
+                //case 3: levantar(); break;
+                }
+            } while (admin == 1 || admin == 2);
+        }
         default: cout << "Opção inválida.\n";
         }
-    } while (opcao != 0);
+
+
+
+
+
+    } while (opcao1 != 0);
 
     return 0;
 }
