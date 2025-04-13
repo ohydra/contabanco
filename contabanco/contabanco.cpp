@@ -1,5 +1,6 @@
 #define EURO char(128)
 #include <iostream>
+#include <windows.h>
 #include <string>
 #include <tchar.h>
 #include <vector>
