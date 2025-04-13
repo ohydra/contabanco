@@ -1,4 +1,3 @@
-#define EURO char(128)
 #include <iostream>
 #include <string>
 #include <tchar.h>
@@ -104,7 +103,7 @@ void adicionarCliente() {
     } while (!ccValido);
 
     c.cartaoCidadao = cc;
-    
+
 
 
 
@@ -368,7 +367,7 @@ void pesquisarPorNIF() {
             cout << "Cliente encontrado:\n";
             cout << "Código (ID): " << c.codigo << " | Nome: " << c.nome
                 << " | CC: " << c.cartaoCidadao << " | NIF: " << c.nif
-                
+
                 << " | Saldo: " << c.saldo << " \xE2\x82\xAC\n";
             encontrado = true;
             break;
@@ -468,16 +467,16 @@ void mostrarEstatisticas() {
 int main() {
     system("chcp 65001 > nul"); //Força a consola para UTF-8 sem mostrar a mensagem
 
-	bool cls = false; //variavel para verificar se o ecra foi limpo inicialmente
+    bool cls = false; //variavel para verificar se o ecra foi limpo inicialmente
     int opcao1;
     int opcao2;
 
 
     do {
-		if (cls==false) {
-			system("cls"); //Limpa o ecra
-			cls = true;
-		}
+        if (cls == false) {
+            system("cls"); //Limpa o ecra
+            cls = true;
+        }
         std::cout << R"(
     _     ____                         __  __              ____       _ _            _  
    | |   | __ )  __ _ _ __   ___ ___   \ \/ /__ _ _   _   / ___|_   _(_) |_ ___     | | 
@@ -501,7 +500,7 @@ int main() {
         case 2: levantar(); break;
         case 3: transferir(); break;
         case 4: pesquisarPorNIF(); break;
-        case 9: 
+        case 9:
             system("cls"); //Limpa o ecra
             do {
                 std::cout << R"(
@@ -522,15 +521,15 @@ int main() {
 
                 switch (opcao2) {
                 case 1: adicionarCliente(); break;
-				case 2: listarClientes(); break;
+                case 2: listarClientes(); break;
                 case 3: mostrarEstatisticas(); break;
                 case 0: cls = false; break;
                 default: cout << "\033[2J\033[1;1HOpção inválida.\n";
-				
+
                 }
             } while (opcao2 != 0);
         default: cout << "\033[2J\033[1;1HOpção inválida.\n";
-            
+
         }
     } while (opcao1 != 0);
 
