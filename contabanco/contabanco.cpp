@@ -1,26 +1,49 @@
+// TRABALHO DE PROGRAMACAO REALIZADO POR:
+//  - Miguel Andrade
+//  - António Dias
+//  - Mickael Ferreira
+
 #include <iostream>
 #include <string>
 #include <tchar.h>
 #include <vector>
 #include <cctype>
+#include <ctime>
 #include <limits>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
 
 
 
-
+// Estrutura para guardar os dados de cada cliente
 struct Cliente {
     int codigo;                 // Código do cliente (ID interno, único)
     string nome;                // Nome completo
     int cartaoCidadao;       // Número do Cartão de Cidadão
     int nif;                 // NIF (único, 9 dígitos)
     double saldo;               // Saldo inicial
+	int pin;		 // PIN da conta
 };
-
 vector<Cliente> clientes;
-int proximoCodigo = 1;
+
+
+// estrutura para guardar os movimentos de todos os clientes
+struct Movimento {
+    string tipo;     // "Depósito", "Levantamento", "Transferência Enviada", "Transferência Recebida"
+    double valor;
+    string detalhes; // Info extra usado nas transferencias (função 4.) (destinatário/origem)
+    string dataHora; // data e hora da operação
+};
+vector<vector<Movimento>> historicoMovimentos; // Um vetor de movimentos por cliente (indexado por código - 1)
+
+
+int proximoCodigo = 1; // Código do próximo cliente a ser adicionado (começa em 1)
+
+
+
 
 // Valida se o NIF tem 9 dígitos
 bool nifValido(int nif) {
@@ -32,6 +55,11 @@ bool ccValido(int cc) {
     return (cc >= 10000000 && cc <= 99999999);
 }
 
+// Valida se o codigo do cliente tem 4 dígitos
+bool pinValido(int pin) {
+    return (pin >= 1000 && pin <= 9999);
+}
+
 // Verifica se o NIF já existe
 bool nifExiste(int nif) {
     for (const auto& c : clientes) {
@@ -40,16 +68,32 @@ bool nifExiste(int nif) {
     return false;
 }
 
-// Encontrar cliente pelo NIF
-Cliente* encontrarCliente(int codigo) {
+// Encontrar cliente pelo codigo e valida com o pin (usado na função 2., 3., 4.)
+Cliente* encontrarCliente(int codigo, int pin) {
+    for (auto& c : clientes) {
+        if (c.codigo == codigo && c.pin == pin) return &c;
+    }
+    return nullptr;
+}
+
+// Encontrar cliente de destino (usado na função 4.)
+Cliente* encontrarDestino(int codigo) {
     for (auto& c : clientes) {
         if (c.codigo == codigo) return &c;
     }
     return nullptr;
 }
 
+// Mostra a data/hora atual formatada como string
+string DataHoraAtual() {
+    time_t agora = time(0);
+    tm tempoLocal;
+    localtime_s(&tempoLocal, &agora);
 
-
+    char buffer[80];
+    strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", &tempoLocal);
+    return string(buffer);
+}
 
 
 
@@ -106,7 +150,6 @@ void adicionarCliente() {
 
 
 
-
     //validacao do nif
     int nif = 0;
     string nifStr;
@@ -145,8 +188,39 @@ void adicionarCliente() {
 
 
 
+	//validacao do registo do PIN
+    int pin = 0;
+    string pinStr;
+    bool pinValido = false;
 
-    cout << "Saldo inicial (EUR): ";
+    do {
+        cout << "Introduza um PIN (entre 4 a 6 números): ";
+        cin >> pinStr;
+
+        // Verifica se todos os caracteres são dígitos
+        bool soNumeros = true;
+        for (char c : pinStr) {
+            if (!isdigit(c)) {
+                soNumeros = false;
+                break;
+            }
+        }
+
+        if (!soNumeros || pinStr.length() < 4 || pinStr.length() > 6) {
+            cout << "Comprimento do PIN invalido. Deve conter entre 4 a 8 numéros.\n";
+            continue;
+        }
+
+        pin = stoi(pinStr);
+        pinValido = true;
+
+    } while (!pinValido);
+
+    c.pin = pin;
+
+
+
+    cout << "Saldo de abertura (EUR): ";
     cin >> c.saldo;
     while (c.saldo < 0) {
         cout << "Saldo não pode ser negativo oh burro! Introduz novamente: ";
@@ -154,8 +228,11 @@ void adicionarCliente() {
     }
 
     clientes.push_back(c);
+    historicoMovimentos.push_back(vector<Movimento>()); // Cria histórico vazio para novo cliente
+
+    cout << "\nCliente registado com sucesso. Código (ID) atribuído: " << c.codigo << "\n";
+    std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
     system("cls"); //Limpa o ecra
-    cout << "Cliente adicionado com sucesso. Código (ID) atribuído: " << c.codigo << "\n";
 }
 
 
@@ -180,16 +257,20 @@ void depositar() {
         return;
     }
 
-    int codigo;
+    int codigo, pin;
     double valor;
-    cout << "Código do cliente (ID): ";
+    cout << "Introduza o seu código (ID) de cliente : ";
     cin >> codigo;
-    Cliente* c = encontrarCliente(codigo);
+    cout << "Introduza o seu PIN: ";
+    cin >> pin;
+    Cliente* c = encontrarCliente(codigo, pin);
+
     if (c) {
         cout << "Valor a depositar (EUR): ";
         cin >> valor;
         if (valor > 0) {
             c->saldo += valor;
+			historicoMovimentos[c->codigo - 1].push_back({ "Depósito", valor, "", DataHoraAtual() }); // Adiciona movimento de Depósito ao histórico e o valor
             cout << "Depósito realizado com sucesso. Novo saldo: " << c->saldo << " €\n";
         }
         else {
@@ -197,7 +278,7 @@ void depositar() {
         }
     }
     else {
-        cout << "Cliente não encontrado.\n";
+        cout << "Cliente não encontrado ou PIN errado.\n";
     }
 }
 
@@ -223,24 +304,27 @@ void levantar() {
         return;
     }
 
-    int codigo;
+    int codigo, pin;
     double valor;
-    cout << "Código do cliente (ID): ";
+    cout << "Introduza o seu código (ID) do cliente : ";
     cin >> codigo;
-    Cliente* c = encontrarCliente(codigo);
+    cout << "Introduza o seu PIN: ";
+    cin >> pin;
+    Cliente* c = encontrarCliente(codigo,pin);
     if (c) {
         cout << "Valor a levantar (EUR): ";
         cin >> valor;
         if (valor > 0 && valor <= c->saldo) {
             c->saldo -= valor;
-            cout << "Levantamento com sucesso. Novo saldo: " << c->saldo << " €, póbre que fode!\n";
+			historicoMovimentos[c->codigo - 1].push_back({ "Levantamento", valor, "", DataHoraAtual() }); // Adiciona movimento de Levantamento ao histórico e o valor
+            cout << "Levantamento com sucesso. Novo saldo: " << c->saldo << " €\n";
         }
         else {
             cout << "Saldo insuficiente ou valor inválido.\n";
         }
     }
     else {
-        cout << "Cliente não encontrado.\n";
+        cout << "Cliente não encontrado ou PIN errado.\n";
     }
 }
 
@@ -266,43 +350,53 @@ void transferir() {
         return;
     }
 
-    int codigoOrigem, codigoDestino;
+    int codigoOrigem, codigoDestino, pin;
     double valor;
 
-    cout << "Código (ID) do cliente de origem: ";
+    cout << "Introduza o seu código (ID) de cliente: ";
     cin >> codigoOrigem;
-    Cliente* origem = encontrarCliente(codigoOrigem);
+    cout << "Introduza o seu PIN: ";
+    cin >> pin;
+    Cliente* origem = encontrarCliente(codigoOrigem,pin);
 
-    cout << "Código (ID) do cliente de destino: ";
-    cin >> codigoDestino;
-    Cliente* destino = encontrarCliente(codigoDestino);
+    if (origem) {
+        cout << "Introduza o código (ID) do cliente de destino: ";
+        cin >> codigoDestino;
+        Cliente* destino = encontrarDestino(codigoDestino);
 
-    if (!origem || !destino) {
-        cout << "Um ou ambos os clientes não foram encontrados.\n";
-        return;
+        if (!destino) {
+            cout << "Cliente de destino não encontrado.\n";
+            return;
+        }
+
+        if (codigoOrigem == codigoDestino) {
+            cout << "Não é permitido transferir para o próprio cliente oh burro, aqui não há multiplicação de guito!\n";
+            return;
+        }
+
+        cout << "Valor a transferir (EUR): ";
+        cin >> valor;
+
+        if (valor <= 0) {
+            cout << "Valor inválido.\n";
+            return;
+        }
+
+        if (origem->saldo < valor) {
+            cout << "Saldo insuficiente para a transferência.\n";
+            return;
+        }
+
+        origem->saldo -= valor;
+        destino->saldo += valor;
+		historicoMovimentos[origem->codigo - 1].push_back({ "Transferência Enviada", valor, "Para: " + destino->nome, DataHoraAtual() }); // Adiciona movimento de Transferência Enviada ao histórico, o valor, e o destino
+		historicoMovimentos[destino->codigo - 1].push_back({ "Transferência Recebida", valor, "De: " + origem->nome, DataHoraAtual() }); // Adiciona movimento de Transferência Recebida ao histórico e o valor, e a origem
+        cout << "Transferência realizada com sucesso.\n";
+
     }
-
-    if (codigoOrigem == codigoDestino) {
-        cout << "Não é permitido transferir para o próprio cliente oh burro, aqui não há multiplicação de guito!\n";
-        return;
+    else {
+        cout << "Cliente não encontrado ou PIN errado.\n";
     }
-
-    cout << "Valor a transferir (EUR): ";
-    cin >> valor;
-
-    if (valor <= 0) {
-        cout << "Valor inválido.\n";
-        return;
-    }
-
-    if (origem->saldo < valor) {
-        cout << "Saldo insuficiente para a transferência.\n";
-        return;
-    }
-
-    origem->saldo -= valor;
-    destino->saldo += valor;
-    cout << "Transferência realizada com sucesso.\n";
 }
 
 
@@ -319,7 +413,7 @@ void transferir() {
 
 
 
-//5. Listar clientes
+//5. Listar todos os clientes
 void listarClientes() {
     system("cls"); //Limpa o ecra
     if (clientes.empty()) {
@@ -330,9 +424,11 @@ void listarClientes() {
     cout << "\n--- Lista de Clientes ---\n";
     for (const auto& c : clientes) {
         cout << "Código (ID): " << c.codigo << " | Nome: " << c.nome << " | CC: " << c.cartaoCidadao
-            << " | NIF: " << c.nif << " | Saldo: " << c.saldo << " €\n";
+            << " | NIF: " << c.nif << " | Saldo: " << c.saldo << "€ | PIN: " << c.pin << "\n";
     }
     cout << "\n\n\n";
+	system("pause"); // Pausa para o utilizador ver a lista
+    system("cls"); //Limpa o ecra
 }
 
 
@@ -364,19 +460,23 @@ void pesquisarPorNIF() {
     bool encontrado = false;
     for (const auto& c : clientes) {
         if (c.nif == nif) {
-            cout << "Cliente encontrado:\n";
+            cout << "\nCliente encontrado:\n";
             cout << "Código (ID): " << c.codigo << " | Nome: " << c.nome
                 << " | CC: " << c.cartaoCidadao << " | NIF: " << c.nif
-
-                << " | Saldo: " << c.saldo << " \xE2\x82\xAC\n";
+                << " | Saldo: " << c.saldo << "€"
+                << " | PIN: " << c.pin << "\n\n";
             encontrado = true;
             break;
         }
+
     }
+
 
     if (!encontrado) {
         cout << "Não foi encontrado nenhum cliente com esse NIF.\n";
     }
+    system("pause"); // Pausa para o utilizador ver a lista
+    system("cls"); //Limpa o ecra
 }
 
 
@@ -441,12 +541,69 @@ void mostrarEstatisticas() {
         if (c.saldo > valorLimite) acimaDeValor++;
     }
 
+    system("cls"); //Limpa o ecra
     cout << "\n--- Estatísticas ---\n";
-    cout << "Total de dinheiro no banco: " << totalSaldo << " €\n";
-    cout << "Média de saldo: " << media << " €\n";
-    cout << "Cliente com maior saldo: " << clienteMaior->nome << " (" << clienteMaior->saldo << " €)\n";
-    cout << "Cliente com menor saldo: " << clienteMenor->nome << " (" << clienteMenor->saldo << " €)\n";
-    cout << "Quantidade de clientes com saldo superior a " << valorLimite << "€: " << acimaDeValor << "\n";
+    cout << "Total de dinheiro no banco: " << totalSaldo << "€\n";
+    cout << "Média de saldo: " << media << "€\n";
+    cout << "Cliente com maior saldo: " << clienteMaior->nome << " (" << clienteMaior->saldo << "€)\n";
+    cout << "Cliente com menor saldo: " << clienteMenor->nome << " (" << clienteMenor->saldo << "€)\n";
+    cout << "Quantidade de clientes com saldo superior a " << valorLimite << "€: " << acimaDeValor << "\n\n";
+    system("pause"); // Pausa para o utilizador ver a lista
+    system("cls"); //Limpa o ecra
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//8. Mostrar movimentos de um cliente
+void mostrarMovimentos() {
+    system("cls"); //Limpa o ecra
+    if (clientes.empty()) {
+        cout << "Não existem clientes registados.\n";
+        return;
+    }
+
+    int codigo, pin;
+    cout << "Introduza o seu código (ID) do cliente : ";
+    cin >> codigo;
+    cout << "Introduza o seu PIN: ";
+    cin >> pin;
+
+    Cliente* c = encontrarCliente(codigo, pin);
+    if (!c) {
+        cout << "Cliente não encontrado.\n";
+        return;
+    }
+
+    cout << "\n--- Últimos movimentos de " << c->nome << " ---\n";
+
+    const auto& movimentos = historicoMovimentos[codigo - 1];
+    int total = movimentos.size();
+
+    if (total == 0) {
+        cout << "Sem movimentos registados.\n";
+        return;
+    }
+
+    int inicio = max(0, total - 20);
+    for (int i = total - 1; i >= inicio; --i) {
+        cout << "[" << movimentos[i].dataHora << "] ";
+        cout << movimentos[i].tipo << " de " << movimentos[i].valor << " €";
+        if (!movimentos[i].detalhes.empty()) {
+            cout << " (" << movimentos[i].detalhes << ")";
+        }
+        cout << endl;
+    }
 }
 
 
@@ -467,15 +624,15 @@ void mostrarEstatisticas() {
 int main() {
     system("chcp 65001 > nul"); //Força a consola para UTF-8 sem mostrar a mensagem
 
-    bool cls = false; //variavel para verificar se o ecra foi limpo inicialmente
-    int opcao1;
-    int opcao2;
+	bool volta = false, adm = false; //variavel para voltar ao menu anterior e variavel de acesso ao painel administrativo
+    int opcao1, opcao2, cod;
+
 
 
     do {
-        if (cls == false) {
+        if (volta == false) {
             system("cls"); //Limpa o ecra
-            cls = true;
+            volta = true;
         }
         std::cout << R"(
     _     ____                         __  __              ____       _ _            _  
@@ -485,10 +642,10 @@ int main() {
   (   /  |____/ \__,_|_| |_|\___\___/  /_/\_\__,_|\__,_|  \____|\__,_|_|\__\___/   (   /
    |_|                                                                              |_| 
         )" << "\n";
-        cout << "  1. Fazer depósito\n";
-        cout << "  2. Fazer levantamento\n";
-        cout << "  3. Fazer uma transferência\n";
-        cout << "  4. Pesquisar por cliente\n";
+        cout << "  1. Verificar movimentos\n";
+        cout << "  2. Fazer depósito\n";
+        cout << "  3. Fazer levantamento\n";
+        cout << "  4. Fazer uma transferência\n";
         cout << "  9. PAINEL ADMINISTRATIVO\n";
         cout << "  0. Sair\n";
         cout << "\nEscolha uma opção: ";
@@ -496,12 +653,13 @@ int main() {
         cin.ignore();
 
         switch (opcao1) {
-        case 1: depositar(); break;
-        case 2: levantar(); break;
-        case 3: transferir(); break;
-        case 4: pesquisarPorNIF(); break;
+        case 1: mostrarMovimentos(); break;
+        case 2: depositar(); break;
+        case 3: levantar(); break;
+        case 4: transferir(); break;
         case 9:
             system("cls"); //Limpa o ecra
+		    adm://apontador para o painel administrativo
             do {
                 std::cout << R"(
     _     ____                         __  __              ____       _ _            _  
@@ -511,22 +669,50 @@ int main() {
   (   /  |____/ \__,_|_| |_|\___\___/  /_/\_\__,_|\__,_|  \____|\__,_|_|\__\___/   (   /
    |_|                             PAINEL ADMINISTRATIVO                            |_| 
                 )" << "\n";
-                cout << "  1. Adicionar cliente\n";
-                cout << "  2. Listar clientes\n";
-                cout << "  3. Estatísticas\n";
-                cout << "< 0. Voltar ao menu anterior\n";
-                cout << "\nEscolha uma opção: ";
-                cin >> opcao2;
-                cin.ignore();
 
-                switch (opcao2) {
-                case 1: adicionarCliente(); break;
-                case 2: listarClientes(); break;
-                case 3: mostrarEstatisticas(); break;
-                case 0: cls = false; break;
-                default: cout << "\033[2J\033[1;1HOpção inválida.\n";
+                if (adm == true) {
+                    cout << "  1. Adicionar cliente\n";
+                    cout << "  2. Listar clientes\n";
+                    cout << "  3. Estatísticas\n";
+                    cout << "  4. Pesquisar por cliente\n";
+                    cout << "< 0. Voltar ao menu anterior\n";
+                    cout << "\nEscolha uma opção: ";
+                    cin >> opcao2;
+                    cin.ignore();
 
+                    switch (opcao2) {
+                        case 1: adicionarCliente(); break;
+                        case 2: listarClientes(); break;
+                        case 3: mostrarEstatisticas(); break;
+                        case 4: pesquisarPorNIF(); break;
+                        case 0: volta = false; break;
+                        default: cout << "\033[2J\033[1;1HOpção inválida.\n";
+                    }
                 }
+                else {
+                    cout << "Introduza o código administrativo: ";
+                    cin >> cod;
+                    if (cod == 1111) {
+                        cout << "\nPainel desbloqueado, bem-vindo";
+						std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+                        system("cls"); // Limpa o ecra
+						adm = true; // desbloqueia o painel administrativo permanentemente
+						goto adm; // vai para o apontador para o painel administrativo
+					}
+					else if (cod == 0) {
+						volta = false; break;
+                    }
+                    else {
+                        cout << "Código errado!\n";
+                        std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+                        volta = false; break;
+                    }
+                }
+
+
+
+
+
             } while (opcao2 != 0);
         default: cout << "\033[2J\033[1;1HOpção inválida.\n";
 
@@ -535,4 +721,3 @@ int main() {
 
     return 0;
 }
-
