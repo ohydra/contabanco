@@ -228,9 +228,8 @@ void adicionarCliente() {
     }
 
     clientes.push_back(c);
-    historicoMovimentos.push_back(vector<Movimento>()); // Cria histórico vazio para novo cliente
-
     cout << "\nCliente registado com sucesso. Código (ID) atribuído: " << c.codigo << "\n";
+    historicoMovimentos.push_back(vector<Movimento>()); // Cria histórico vazio para novo cliente
     std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
     system("cls"); //Limpa o ecra
 }
@@ -272,13 +271,19 @@ void depositar() {
             c->saldo += valor;
 			historicoMovimentos[c->codigo - 1].push_back({ "Depósito", valor, "", DataHoraAtual() }); // Adiciona movimento de Depósito ao histórico e o valor
             cout << "Depósito realizado com sucesso. Novo saldo: " << c->saldo << " €\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+            system("cls"); // Limpa o ecra
         }
         else {
             cout << "Valor inválido.\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+            system("cls"); // Limpa o ecra
         }
     }
     else {
         cout << "Cliente não encontrado ou PIN errado.\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+        system("cls"); // Limpa o ecra
     }
 }
 
@@ -318,13 +323,19 @@ void levantar() {
             c->saldo -= valor;
 			historicoMovimentos[c->codigo - 1].push_back({ "Levantamento", valor, "", DataHoraAtual() }); // Adiciona movimento de Levantamento ao histórico e o valor
             cout << "Levantamento com sucesso. Novo saldo: " << c->saldo << " €\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+            system("cls"); // Limpa o ecra
         }
         else {
             cout << "Saldo insuficiente ou valor inválido.\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+            system("cls"); // Limpa o ecra
         }
     }
     else {
         cout << "Cliente não encontrado ou PIN errado.\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+        system("cls"); // Limpa o ecra
     }
 }
 
@@ -366,11 +377,15 @@ void transferir() {
 
         if (!destino) {
             cout << "Cliente de destino não encontrado.\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+            system("cls"); // Limpa o ecra
             return;
         }
 
         if (codigoOrigem == codigoDestino) {
             cout << "Não é permitido transferir para o próprio cliente oh burro, aqui não há multiplicação de guito!\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+            system("cls"); // Limpa o ecra
             return;
         }
 
@@ -379,11 +394,15 @@ void transferir() {
 
         if (valor <= 0) {
             cout << "Valor inválido.\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+            system("cls"); // Limpa o ecra
             return;
         }
 
         if (origem->saldo < valor) {
             cout << "Saldo insuficiente para a transferência.\n";
+            std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+            system("cls"); // Limpa o ecra
             return;
         }
 
@@ -392,10 +411,14 @@ void transferir() {
 		historicoMovimentos[origem->codigo - 1].push_back({ "Transferência Enviada", valor, "Para: " + destino->nome, DataHoraAtual() }); // Adiciona movimento de Transferência Enviada ao histórico, o valor, e o destino
 		historicoMovimentos[destino->codigo - 1].push_back({ "Transferência Recebida", valor, "De: " + origem->nome, DataHoraAtual() }); // Adiciona movimento de Transferência Recebida ao histórico e o valor, e a origem
         cout << "Transferência realizada com sucesso.\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+        system("cls"); // Limpa o ecra
 
     }
     else {
         cout << "Cliente não encontrado ou PIN errado.\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
+        system("cls"); // Limpa o ecra
     }
 }
 
@@ -535,7 +558,7 @@ void mostrarEstatisticas() {
         }
     } while (valorLimite < 0);
 
-
+   
 
     for (const auto& c : clientes) {
         if (c.saldo > valorLimite) acimaDeValor++;
@@ -591,8 +614,8 @@ void mostrarMovimentos() {
     int total = movimentos.size();
 
     if (total == 0) {
-        cout << "Sem movimentos registados.\n";
-        return;
+        cout << "Sem movimentos registados.";
+        cout << "\n\n[ Saldo atual: " << c->saldo << "€ ]\n";
     }
 
     int inicio = max(0, total - 20);
@@ -602,8 +625,13 @@ void mostrarMovimentos() {
         if (!movimentos[i].detalhes.empty()) {
             cout << " (" << movimentos[i].detalhes << ")";
         }
+		cout << "\n\n[ Saldo atual: " << c->saldo << "€ ]";
         cout << endl;
     }
+    cout << "\n";
+    system("pause"); // Pausa para o utilizador ver a lista
+    system("cls"); //Limpa o ecra
+    return;
 }
 
 
@@ -646,7 +674,7 @@ int main() {
         cout << "  2. Fazer depósito\n";
         cout << "  3. Fazer levantamento\n";
         cout << "  4. Fazer uma transferência\n";
-        cout << "  9. PAINEL ADMINISTRATIVO\n";
+        cout << "  9. ADMINISTRAÇÃO\n";
         cout << "  0. Sair\n";
         cout << "\nEscolha uma opção: ";
         cin >> opcao1;
