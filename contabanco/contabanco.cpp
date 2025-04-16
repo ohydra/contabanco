@@ -20,12 +20,12 @@ using namespace std;
 
 // Estrutura para guardar os dados de cada cliente
 struct Cliente {
-    int codigo;                 // Código do cliente (ID interno, único)
-    string nome;                // Nome completo
-    int cartaoCidadao;       // Número do Cartão de Cidadão
-    int nif;                 // NIF (único, 9 dígitos)
-    double saldo;               // Saldo inicial
-	int pin;		 // PIN da conta
+    int codigo;             // Código do cliente (ID interno, único)
+    string nome;            // Nome completo
+    int cartaoCidadao;      // Número do Cartão de Cidadão
+    int nif;                // NIF (único, 9 dígitos)
+    double saldo;           // Saldo
+    int pin;		        // PIN da conta
 };
 vector<Cliente> clientes;
 
