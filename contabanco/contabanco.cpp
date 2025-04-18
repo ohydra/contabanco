@@ -252,7 +252,7 @@ void adicionarCliente() {
 void depositar() {
     system("cls"); //Limpa o ecra
     if (clientes.empty()) {
-        cout << "Não existem clientes registados.\n";
+        cout << "\033[31mNão existem clientes registados.\033[0m\n";
         return;
     }
 
@@ -305,7 +305,7 @@ void depositar() {
 void levantar() {
     system("cls"); //Limpa o ecra
     if (clientes.empty()) {
-        cout << "Não existem clientes registados.\n";
+        cout << "\033[31mNão existem clientes registados.\033[0m\n";
         return;
     }
 
@@ -357,7 +357,7 @@ void levantar() {
 void transferir() {
     system("cls"); //Limpa o ecra
     if (clientes.empty()) {
-        cout << "Não existem clientes registados.\n";
+        cout << "\033[31mNão existem clientes registados.\033[0m\n";
         return;
     }
 
@@ -440,7 +440,7 @@ void transferir() {
 void listarClientes() {
     system("cls"); //Limpa o ecra
     if (clientes.empty()) {
-        cout << "Não existem clientes registados.\n";
+        cout << "\033[31mNão existem clientes registados.\033[0m\n";
         return;
     }
 
@@ -472,7 +472,7 @@ void listarClientes() {
 void pesquisarPorNIF() {
     system("cls"); //Limpa o ecra
     if (clientes.empty()) {
-        cout << "Não existem clientes registados.\n";
+        cout << "\033[31mNão existem clientes registados.\033[0m\n";
         return;
     }
 
@@ -496,7 +496,7 @@ void pesquisarPorNIF() {
 
 
     if (!encontrado) {
-        cout << "Não foi encontrado nenhum cliente com esse NIF.\n";
+        cout << "\033[31mNão foi encontrado nenhum cliente com esse NIF.\033[0m\n";
     }
     system("pause"); // Pausa para o utilizador ver a lista
     system("cls"); //Limpa o ecra
@@ -520,7 +520,7 @@ void pesquisarPorNIF() {
 void mostrarEstatisticas() {
     system("cls"); //Limpa o ecra
     if (clientes.empty()) {
-        cout << "Não existem clientes registados.\n";
+        cout << "\033[31mNão existem clientes registados.\033[0m\n";
         return;
     }
 
@@ -592,7 +592,7 @@ void mostrarEstatisticas() {
 void mostrarMovimentos() {
     system("cls"); //Limpa o ecra
     if (clientes.empty()) {
-        cout << "Não existem clientes registados.\n";
+        cout << "\033[31mNão existem clientes registados.\033[0m\n";
         return;
     }
 
@@ -604,7 +604,7 @@ void mostrarMovimentos() {
 
     Cliente* c = encontrarCliente(codigo, pin);
     if (!c) {
-        cout << "Cliente não encontrado.\n";
+        cout << "\033[31mCliente não encontrado.\033[0m\n";
         return;
     }
 
@@ -614,7 +614,7 @@ void mostrarMovimentos() {
     int total = movimentos.size();
 
     if (total == 0) {
-        cout << "Sem movimentos registados.";
+        cout << "\033[31mSem movimentos registados.\033[0m\n";
         cout << "\n\n[ Saldo atual: " << c->saldo << "€ ]\n";
     }
 
@@ -731,7 +731,7 @@ int main() {
 						volta = false; break;
                     }
                     else {
-                        cout << "Código errado!\n";
+                        cout << "\033[31mCódigo errado!\033[0m\n";
                         std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
                         volta = false; break;
                     }
