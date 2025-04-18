@@ -115,8 +115,7 @@ void adicionarCliente() {
     c.codigo = proximoCodigo++;
 
     cout << "Nome completo do cliente: ";
-    cin.ignore();
-    getline(cin, c.nome);
+    getline(cin >> ws, c.nome);
 
 
     //validacao do cartao de cidadao
