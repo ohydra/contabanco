@@ -3,15 +3,16 @@
 //  - António Dias
 //  - Mickael Ferreira
 
-#include <iostream>
-#include <string>
-#include <tchar.h>
-#include <vector>
-#include <cctype>
-#include <ctime>
-#include <limits>
-#include <thread>
-#include <chrono>
+#include <iostream>     // Biblioteca para operações de entrada e saída (cin, cout, etc.)
+#include <string>       // Biblioteca que permite trabalhar com objetos da classe string
+#include <tchar.h>      // Biblioteca para suportar caracteres Unicode
+#include <vector>       // Biblioteca da STL que permite usar o container vector
+#include <cctype>       // Biblioteca com funções para manipulação de caracteres (ex: isdigit, toupper, etc.)
+#include <ctime>        // Biblioteca para manipular tempo e datas (ex: time, localtime, etc.)
+#include <limits>       // Biblioteca que define propriedades dos tipos primitivos (ex: limites máximos e mínimos)
+#include <thread>       // Permite criar e manipular threads (execução paralela)
+#include <chrono>       // Fornece funcionalidades relacionadas com tempo (ex: medir tempo de execução, delays, etc.)
+
 
 using namespace std;
 
@@ -137,7 +138,7 @@ void adicionarCliente() {
         }
 
         if (!soNumeros || ccStr.length() != 8) {
-            cout << "Cartão de Cidadão inválido. Deve conter exatamente 8 numéros.\n";
+            cout << "Cartão de Cidadão inválido. Deve conter exatamente 8 números.\n";
             continue;
         }
 
@@ -169,7 +170,7 @@ void adicionarCliente() {
         }
 
         if (!soNumeros || nifStr.length() != 9) {
-            cout << "NIF inválido. Deve conter exatamente 9 numéros.\n";
+            cout << "NIF inválido. Deve conter exatamente 9 números.\n";
             continue;
         }
 
@@ -207,7 +208,7 @@ void adicionarCliente() {
         }
 
         if (!soNumeros || pinStr.length() < 4 || pinStr.length() > 6) {
-            cout << "Comprimento do PIN invalido. Deve conter entre 4 a 8 numéros.\n";
+            cout << "Comprimento do PIN invalido. Deve conter entre 4 a 8 números.\n";
             continue;
         }
 
