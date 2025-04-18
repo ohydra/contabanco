@@ -114,9 +114,33 @@ void adicionarCliente() {
     Cliente c;
     c.codigo = proximoCodigo++;
 
-    cout << "Nome completo do cliente: ";
-    getline(cin >> ws, c.nome);
+	//Nome do cliente
+    string nome;
+    bool nomeValido = false;
 
+	//Validacao do nome, não pode ter números ou caracteres especiais e deve contter no mínimo 10 caracteres
+    do {
+        cout << "Nome completo do cliente: ";
+        getline(cin >> ws, nome);
+
+        bool apenasLetrasEspacos = true;
+        for (char ch : nome) {
+            if (!isalpha(ch) && !isspace(ch)) {
+                apenasLetrasEspacos = false;
+                break;
+            }
+        }
+
+        if (!apenasLetrasEspacos || nome.length() < 10) {
+            cout << "\033[31mNome inválido. Deve conter apenas letras e ter no mínimo 10 caracteres.\033[0m\n";
+            continue;
+        }
+
+        nomeValido = true;
+
+    } while (!nomeValido);
+
+    c.nome = nome;
 
     //validacao do cartao de cidadao
     int cc = 0;
@@ -137,7 +161,7 @@ void adicionarCliente() {
         }
 
         if (!soNumeros || ccStr.length() != 8) {
-            cout << "Cartão de Cidadão inválido. Deve conter exatamente 8 números.\n";
+            cout << "\033[31mNúmero do Cartão de Cidadão inválido. Deve conter exatamente 8 números.\033[0m\n";
             continue;
         }
 
@@ -169,14 +193,14 @@ void adicionarCliente() {
         }
 
         if (!soNumeros || nifStr.length() != 9) {
-            cout << "NIF inválido. Deve conter exatamente 9 números.\n";
+            cout << "\033[31mNIF inválido. Deve conter exatamente 9 números.\033[0m\n";
             continue;
         }
 
         nif = stoi(nifStr); // Converter para int
 
         if (nifExiste(nif)) {
-            cout << "Este NIF já está registado. Introduza outro!\n";
+            cout << "\033[31mEste NIF já está registado.Tente novamente!\033[0m\n";
         }
         else {
             valido = true;
@@ -207,7 +231,7 @@ void adicionarCliente() {
         }
 
         if (!soNumeros || pinStr.length() < 4 || pinStr.length() > 6) {
-            cout << "Comprimento do PIN invalido. Deve conter entre 4 a 8 números.\n";
+            cout << "\033[31mPIN inválido. Deve conter entre 4 a 6 números.\033[0m\n";
             continue;
         }
 
@@ -223,7 +247,7 @@ void adicionarCliente() {
     cout << "Saldo de abertura (EUR): ";
     cin >> c.saldo;
     while (c.saldo < 0) {
-        cout << "Saldo não pode ser negativo oh burro! Introduz novamente: ";
+        cout << "\033[31mO saldo não pode ser negativo! Tente novamente: \033[0m\n";
         cin >> c.saldo;
     }
 
@@ -275,13 +299,13 @@ void depositar() {
             system("cls"); // Limpa o ecra
         }
         else {
-            cout << "Valor inválido.\n";
+            cout << "\033[31mValor inválido.\033[0m\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
             system("cls"); // Limpa o ecra
         }
     }
     else {
-        cout << "Cliente não encontrado ou PIN errado.\n";
+        cout << "\033[31mCliente não encontrado ou PIN errado.\033[0m\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
         system("cls"); // Limpa o ecra
     }
@@ -327,13 +351,13 @@ void levantar() {
             system("cls"); // Limpa o ecra
         }
         else {
-            cout << "Saldo insuficiente ou valor inválido.\n";
+            cout << "\033[31mSaldo insuficiente ou valor inválido.\033[0m\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
             system("cls"); // Limpa o ecra
         }
     }
     else {
-        cout << "Cliente não encontrado ou PIN errado.\n";
+        cout << "\033[31mCliente não encontrado ou PIN errado.\033[0m\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
         system("cls"); // Limpa o ecra
     }
@@ -376,7 +400,7 @@ void transferir() {
         Cliente* destino = encontrarDestino(codigoDestino);
 
         if (!destino) {
-            cout << "Cliente de destino não encontrado.\n";
+            cout << "\033[31mCliente de destino não encontrado.\033[0m\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
             system("cls"); // Limpa o ecra
             return;
@@ -393,7 +417,7 @@ void transferir() {
         cin >> valor;
 
         if (valor <= 0) {
-            cout << "Valor inválido.\n";
+            cout << "\033[31mValor inválido.\033[0m\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
             system("cls"); // Limpa o ecra
             return;
@@ -416,7 +440,7 @@ void transferir() {
 
     }
     else {
-        cout << "Cliente não encontrado ou PIN errado.\n";
+        cout << "\033[31mCliente não encontrado ou PIN errado.\033[0m\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
         system("cls"); // Limpa o ecra
     }
@@ -553,7 +577,7 @@ void mostrarEstatisticas() {
         if (cin.fail() || valorLimite < 0) {
             cin.clear();
             cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            cout << "Valor inválido. Tente novamente.\n";
+            cout << "\033[31mValor inválido. Tente novamente.\033[0m\n";
             valorLimite = -1;
         }
     } while (valorLimite < 0);
