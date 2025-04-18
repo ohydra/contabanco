@@ -12,12 +12,9 @@
 #include <limits>       // Biblioteca que define propriedades dos tipos primitivos (ex: limites máximos e mínimos)
 #include <thread>       // Permite criar e manipular threads (execução paralela)
 #include <chrono>       // Fornece funcionalidades relacionadas com tempo (ex: medir tempo de execução, delays, etc.)
-
+#include <conio.h>      // Biblioteca específica do Windows usada para ler caracteres do teclado sem precisar carregar no Enter (ex: _getch())
 
 using namespace std;
-
-
-
 
 // Estrutura para guardar os dados de cada cliente
 struct Cliente {
@@ -94,6 +91,24 @@ string DataHoraAtual() {
     char buffer[80];
     strftime(buffer, sizeof(buffer), "%d-%m-%Y %H:%M:%S", &tempoLocal);
     return string(buffer);
+}
+
+// Lê o código oculto (PIN) e retorna como string
+string lerCodigoOculto() {
+    string input;
+    char ch;
+    while ((ch = _getch()) != '\r') { // Enter
+        if (isdigit(ch)) {
+            input += ch;
+            cout << '*';
+        }
+        else if (ch == '\b' && !input.empty()) { // Backspace
+            input.pop_back();
+            cout << "\b \b";
+        }
+    }
+    cout << endl;
+    return input;
 }
 
 
@@ -674,18 +689,17 @@ void mostrarMovimentos() {
 
 // Menu principal
 int main() {
-    system("chcp 65001 > nul"); //Força a consola para UTF-8 sem mostrar a mensagem
+    system("chcp 65001 > nul"); // Força UTF-8 no terminal
 
-	bool volta = false, adm = false; //variavel para voltar ao menu anterior e variavel de acesso ao painel administrativo
-    int opcao1, opcao2, cod;
-
-
+    bool volta = false;
+    int opcao1, opcao2;
 
     do {
-        if (volta == false) {
-            system("cls"); //Limpa o ecra
+        if (!volta) {
+            system("cls");
             volta = true;
         }
+
         std::cout << R"(
     _     ____                         __  __              ____       _ _            _  
    | |   | __ )  __ _ _ __   ___ ___   \ \/ /__ _ _   _   / ___|_   _(_) |_ ___     | | 
@@ -694,6 +708,7 @@ int main() {
   (   /  |____/ \__,_|_| |_|\___\___/  /_/\_\__,_|\__,_|  \____|\__,_|_|\__\___/   (   /
    |_|                                                                              |_| 
         )" << "\n";
+
         cout << "  1. Verificar movimentos\n";
         cout << "  2. Fazer depósito\n";
         cout << "  3. Fazer levantamento\n";
@@ -709,66 +724,73 @@ int main() {
         case 2: depositar(); break;
         case 3: levantar(); break;
         case 4: transferir(); break;
-        case 9:
-            system("cls"); //Limpa o ecra
-		    adm://apontador para o painel administrativo
+
+        case 9: {
+            string codStr;
+            bool codigoValido = false;
+
             do {
-                std::cout << R"(
+                cout << "Introduza o código administrativo: ";
+                codStr = lerCodigoOculto();
+
+                if (codStr == "1111") {
+                    cout << "\n\033[32mPainel desbloqueado, bem-vindo!\033[0m";
+                    std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+                    system("cls");
+                    codigoValido = true;
+
+                    // Menu administrativo
+                    do {
+                        std::cout << R"(
     _     ____                         __  __              ____       _ _            _  
    | |   | __ )  __ _ _ __   ___ ___   \ \/ /__ _ _   _   / ___|_   _(_) |_ ___     | | 
   / __)  |  _ \ / _` | '_ \ / __/ _ \   \  // _` | | | | | |  _| | | | | __/ _ \   / __)
   \__ \  | |_) | (_| | | | | (_| (_) |  /  \ (_| | |_| | | |_| | |_| | | || (_) |  \__ \
   (   /  |____/ \__,_|_| |_|\___\___/  /_/\_\__,_|\__,_|  \____|\__,_|_|\__\___/   (   /
    |_|                             PAINEL ADMINISTRATIVO                            |_| 
-                )" << "\n";
+                            )" << "\n";
 
-                if (adm == true) {
-                    cout << "  1. Adicionar cliente\n";
-                    cout << "  2. Listar clientes\n";
-                    cout << "  3. Estatísticas\n";
-                    cout << "  4. Pesquisar por cliente\n";
-                    cout << "< 0. Voltar ao menu anterior\n";
-                    cout << "\nEscolha uma opção: ";
-                    cin >> opcao2;
-                    cin.ignore();
+                        cout << "  1. Adicionar cliente\n";
+                        cout << "  2. Listar clientes\n";
+                        cout << "  3. Estatísticas\n";
+                        cout << "  4. Pesquisar por cliente\n";
+                        cout << "< 0. Voltar ao menu anterior\n";
+                        cout << "\nEscolha uma opção: ";
+                        cin >> opcao2;
+                        cin.ignore();
 
-                    switch (opcao2) {
+                        switch (opcao2) {
                         case 1: adicionarCliente(); break;
                         case 2: listarClientes(); break;
                         case 3: mostrarEstatisticas(); break;
                         case 4: pesquisarPorNIF(); break;
                         case 0: volta = false; break;
                         default: cout << "\033[2J\033[1;1HOpção inválida.\n";
-                    }
+                        }
+
+                    } while (opcao2 != 0);
+                }
+                else if (codStr == "0") {
+                    volta = false;
+                    break;
                 }
                 else {
-                    cout << "Introduza o código administrativo: ";
-                    cin >> cod;
-                    if (cod == 1111) {
-                        cout << "\nPainel desbloqueado, bem-vindo";
-						std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
-                        system("cls"); // Limpa o ecra
-						adm = true; // desbloqueia o painel administrativo permanentemente
-						goto adm; // vai para o apontador para o painel administrativo
-					}
-					else if (cod == 0) {
-						volta = false; break;
-                    }
-                    else {
-                        cout << "\033[31mCódigo errado!\033[0m\n";
-                        std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
-                        volta = false; break;
-                    }
+                    cout << "\033[31mCódigo errado! Tente novamente ou introduza 0 para voltar.\033[0m\n";
+                    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
                 }
 
-
-
-
-
-            } while (opcao2 != 0);
-        default: cout << "\033[2J\033[1;1HOpção inválida.\n";
-
+            } while (!codigoValido);
+            break;
         }
+
+        case 0:
+            cout << "A sair do programa...\n";
+            break;
+
+        default:
+            cout << "\033[2J\033[1;1HOpção inválida.\n";
+        }
+
     } while (opcao1 != 0);
 
     return 0;
