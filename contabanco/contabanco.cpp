@@ -267,7 +267,7 @@ void adicionarCliente() {
     }
 
     clientes.push_back(c);
-    cout << "\nCliente registado com sucesso. Código (ID) atribuído: " << c.codigo << "\n";
+    cout << "\n\033[32mCliente registado com sucesso. Código (ID) atribuído: " << c.codigo << "\033[0m\n";
     historicoMovimentos.push_back(vector<Movimento>()); // Cria histórico vazio para novo cliente
     std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
     system("cls"); //Limpa o ecra
@@ -439,7 +439,7 @@ void transferir() {
         }
 
         if (origem->saldo < valor) {
-            cout << "Saldo insuficiente para a transferência.\n";
+            cout << "\033[31mSaldo insuficiente para a transferência.\033[0m\n";
             std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
             system("cls"); // Limpa o ecra
             return;
@@ -449,7 +449,7 @@ void transferir() {
         destino->saldo += valor;
 		historicoMovimentos[origem->codigo - 1].push_back({ "Transferência Enviada", valor, "Para: " + destino->nome, DataHoraAtual() }); // Adiciona movimento de Transferência Enviada ao histórico, o valor, e o destino
 		historicoMovimentos[destino->codigo - 1].push_back({ "Transferência Recebida", valor, "De: " + origem->nome, DataHoraAtual() }); // Adiciona movimento de Transferência Recebida ao histórico e o valor, e a origem
-        cout << "Transferência realizada com sucesso.\n";
+        cout << "\033[32mTransferência realizada com sucesso.\033[0m\n";
         std::this_thread::sleep_for(std::chrono::milliseconds(3000)); // Para o programa 3 segundos
         system("cls"); // Limpa o ecra
 
@@ -643,7 +643,9 @@ void mostrarMovimentos() {
 
     Cliente* c = encontrarCliente(codigo, pin);
     if (!c) {
-        cout << "\033[31mCliente não encontrado.\033[0m\n";
+        cout << "\033[31mCódigo de cliente ou PIN incorreto. Tente novamente.\033[0m\n";
+        std::this_thread::sleep_for(std::chrono::milliseconds(3000));
+        system("cls");
         return;
     }
 
@@ -765,7 +767,7 @@ int main() {
                         case 3: mostrarEstatisticas(); break;
                         case 4: pesquisarPorNIF(); break;
                         case 0: volta = false; break;
-                        default: cout << "\033[2J\033[1;1HOpção inválida.\n";
+                        cout << "\033[2J\033[1;1H\033[31mOpção inválida. Tente novamente.\033[0m\n";
                         }
 
                     } while (opcao2 != 0);
@@ -788,7 +790,7 @@ int main() {
             break;
 
         default:
-            cout << "\033[2J\033[1;1HOpção inválida.\n";
+            cout << "\033[2J\033[1;1H\033[31mOpção inválida. Tente novamente.\033[0m\n";
         }
 
     } while (opcao1 != 0);
